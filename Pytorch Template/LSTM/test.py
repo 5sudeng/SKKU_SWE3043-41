@@ -6,7 +6,8 @@ import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
-
+import numpy as np
+import matplotlib.pyplot as plt
 
 def main(config):
     logger = config.get_logger('test')
@@ -45,13 +46,16 @@ def main(config):
     total_metrics = torch.zeros(len(metric_fns))
 
     with torch.no_grad():
+        predictions = []  
+        ground_truth = []  
+
         for i, (data, target) in enumerate(tqdm(data_loader)):
             data, target = data.to(device), target.to(device)
             output = model(data)
 
-            #
-            # save sample images, or do something with output here
-            #
+            # 예측 결과와 실제 값 저장
+            predictions.append(output.cpu().numpy())
+            ground_truth.append(target.cpu().numpy())
 
             # computing loss, metrics on test set
             loss = loss_fn(output, target)
@@ -60,6 +64,10 @@ def main(config):
             for i, metric in enumerate(metric_fns):
                 total_metrics[i] += metric(output, target) * batch_size
 
+    # 예측 결과와 실제 값을 numpy 배열로 변환
+    predictions = np.concatenate(predictions, axis=0)
+    ground_truth = np.concatenate(ground_truth, axis=0)
+
     n_samples = len(data_loader.sampler)
     log = {'loss': total_loss / n_samples}
     log.update({
@@ -67,6 +75,17 @@ def main(config):
     })
     logger.info(log)
 
+    # 시계열 그래프 시각화 및 저장
+    visualize_time_series(predictions, ground_truth)
+
+def visualize_time_series(predictions, ground_truth):
+    plt.figure(figsize=(10, 5))
+    plt.plot(predictions, label='Predicted')
+    plt.plot(ground_truth, label='Ground Truth')
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.savefig('time_series_plot.png')  # 그래프를 이미지 파일로 저장
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
