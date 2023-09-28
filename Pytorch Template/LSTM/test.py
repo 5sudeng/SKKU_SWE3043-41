@@ -8,6 +8,7 @@ import model.model as module_arch
 from parse_config import ConfigParser
 import numpy as np
 import matplotlib.pyplot as plt
+from data.transformation.preprocessing import MyDataset
 
 def main(config):
     logger = config.get_logger('test')
@@ -15,11 +16,11 @@ def main(config):
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
         config['data_loader']['args']['data_dir'],
-        batch_size=512,
+        batch_size=8,
         shuffle=False,
         validation_split=0.0,
         training=False,
-        num_workers=2
+        num_workers=1
     )
 
     # build model architecture
@@ -44,6 +45,9 @@ def main(config):
 
     total_loss = 0.0
     total_metrics = torch.zeros(len(metric_fns))
+
+    dataset = MyDataset(config['data_loader']['args']['data_dir'], 3, training=False)  # MyDataset 인스턴스 생성
+    min_val, max_val = dataset.get_min_max_values()
 
     with torch.no_grad():
         predictions = []  
@@ -74,6 +78,10 @@ def main(config):
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
     })
     logger.info(log)
+
+    #역 정규화 수행
+    predictions = predictions * (max_val - min_val) + min_val
+    ground_truth = ground_truth * (max_val - min_val) + min_val
 
     # 시계열 그래프 시각화 및 저장
     visualize_time_series(predictions, ground_truth)

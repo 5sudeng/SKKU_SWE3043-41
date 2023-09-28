@@ -4,22 +4,34 @@ import datetime
 from torch.utils.data import Dataset
 
 class MyDataset(Dataset):
-    def __init__(self, data_dir, sequence_length):
+    def __init__(self, data_dir, sequence_length, training):
         df = pd.read_csv(data_dir, delimiter=";")
         df["clock"] = df["clock"].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime('%Y/%m/%d %H:%M:%S'))
         df = df.sort_values("clock")
 
         self.X, self.y = create_sequences(df["value_avg"], sequence_length)
-        MIN = self.X.min()
-        MAX = self.X.max()
-        self.X = MinMaxScale(self.X, MIN, MAX)
-        self.y = MinMaxScale(self.y, MIN, MAX)
+        self.MIN = self.X.min()
+        self.MAX = self.X.max()
+        self.X = MinMaxScale(self.X, self.MIN, self.MAX)
+        self.y = MinMaxScale(self.y, self.MIN, self.MAX)
+
+        split_index = int(len(self.X) * 0.9)
+        if training:
+            self.X = self.X[:split_index]
+            self.y = self.y[:split_index]
+        else:
+            self.X = self.X[split_index:]
+            self.y = self.y[split_index:]
+
 
     def __len__(self):
         return len(self.X)
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
+    
+    def get_min_max_values(self):
+        return self.MIN, self.MAX 
     
 def create_sequences(data, seq_length):
     xs = []
