@@ -93,7 +93,7 @@ def visualize_time_series(predictions, ground_truth):
     plt.xlabel('Time')
     plt.ylabel('Value')
     plt.legend()
-    plt.savefig('time_series_plot.png')  # 그래프를 이미지 파일로 저장
+    plt.savefig(f'results/{config["arch"]["type"]}-{str(config.resume)[-26:-15]}.png')  # 그래프를 이미지 파일로 저장
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
