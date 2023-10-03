@@ -1,9 +1,0 @@
-2023-09-27 02:24:17,325 - train - INFO - LSTM(
-  (lstm): LSTM(1, 50, dropout=0.2)
-  (linear): Linear(in_features=50, out_features=1, bias=True)
-)
-2023-09-27 02:24:54,988 - trainer - INFO -     epoch          : 1
-2023-09-27 02:24:54,988 - trainer - INFO -     loss           : 0.20392087951608723
-2023-09-27 02:24:54,988 - trainer - INFO -     val_loss       : 0.20092752685942122
-2023-09-27 02:24:54,993 - trainer - INFO - Saving checkpoint: saved/models/LSTMmodel/0927_022417/checkpoint-epoch1.pth ...
-2023-09-27 02:24:54,996 - trainer - INFO - Saving current best: model_best.pth ...

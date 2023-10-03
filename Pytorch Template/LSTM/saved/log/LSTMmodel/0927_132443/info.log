@@ -1,4 +1,0 @@
-2023-09-27 13:24:43,964 - train - INFO - LSTM(
-  (lstm): LSTM(1, 50, dropout=0.2)
-  (linear): Linear(in_features=50, out_features=1, bias=True)
-)
